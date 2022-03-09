@@ -318,9 +318,15 @@ mydf_replace.replace(replace_organic, inplace=True)
 mydf_replace.replace(replace_co2score, inplace=True)
 
 
+# original
 y = mydf_replace.co2_score
-mydf_features = ['produce', 'origin_country','transport_type','greenhouse_produce','organic_produce']
-X = mydf_replace[mydf_features]
+#mydf_features = ['produce', 'origin_country','transport_type','greenhouse_produce','organic_produce']
+#X = mydf_replace[mydf_features]
+
+# adjusted
+mydf2 = ['produce', 'origin_country','transport_type', 'base_co2',
+                 'greenhouse_produce','organic_produce']
+X = mydf_replace[mydf2]
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size= 0.2, random_state=0)
 sc = StandardScaler()
 X_train = sc.fit_transform(X_train)
@@ -333,13 +339,16 @@ dtr.fit(X_train, y_train)
 prediction_dtr = dtr.predict(X_test)
 #print(classification_report(y_test, prediction_dtr))
 # accuracy of 57%
+# with 'base_co2' --> accuracy: 62%
+# with all transport co2 values --> accuracy: 99%
 
 # Random Forest Classifier
 rfc = RandomForestClassifier(n_estimators=200)
 rfc.fit(X_train, y_train)
 prediction_rfc = rfc.predict(X_test)
-#print(classification_report(y_test, prediction_rfc))
+# print(classification_report(y_test, prediction_rfc))
 # accuracy of 54%
+# with 'base_co2' --> accuracy: 55%
 
 # Support Vector Classifier
 svc = SVC()
@@ -347,6 +356,7 @@ svc.fit(X_train, y_train)
 prediction_svc = svc.predict(X_test)
 #print(classification_report(y_test, prediction_svc))
 # accuracy of 53%
+# with 'base_co2' --> accuracy: 64%
 
 # Stochastic Gradient Decent Classifier
 sgd = SGDClassifier(penalty=None)
@@ -354,12 +364,13 @@ sgd.fit(X_train, y_train)
 prediction_sgd = sgd.predict(X_test)
 #print(classification_report(y_test, prediction_sgd))
 # accuracy of 52%
+# with 'base_co2' --> accuracy: 58%
 
-# Linear Regression - parameters can't handle mix of multiclass and continuous targets
+# Linear Regression - 'parameters can't handle mix of multiclass and continuous targets'
 from sklearn.linear_model import LinearRegression
-lr = LinearRegression(normalize=True)
-lr.fit(X, y)
-prediction_lr = lr.predict(X_test)
+#lr = LinearRegression(normalize=True)
+#lr.fit(X, y)
+#prediction_lr = lr.predict(X_test)
 #print(classification_report(y_test, prediction_lr))
 
 # Naive Bayes
@@ -369,14 +380,34 @@ gnb.fit(X_train, y_train)
 prediction_gnb = gnb.predict(X_test)
 #print(classification_report(y_test, prediction_gnb))
 # accuracy of 50%
+# with 'base_co2' --> accuracy: 60%
 
-# KNN - doesn't work
+# KNN - doesn't work!!
 from sklearn import neighbors
 
-knn = neighbors.KNeighborsClassifier(n_neighbors=5)
+knn = neighbors.KNeighborsClassifier(n_neighbors=4)
 knn.fit(X_train, y_train)
 prediction_knn = knn.predict_proba(X_test)
 #print(classification_report(y_test, prediction_knn))
 # accuracy of ...
 
 
+## fine-tuning the model
+# grid search
+from sklearn.model_selection import GridSearchCV
+#params = {"n_neighbors": np.arange(1,5), "metric": ["euclidean", "cityblock"]}
+#grid = GridSearchCV(estimator=knn, param_grid=params)
+#grid.fit(X_train, y_train)
+#print(grid.best_score_)
+#print(grid.best_estimator_.n_neighbors)
+
+# randomized parameter optimization
+from sklearn.model_selection import RandomizedSearchCV
+params = {"n_neighbors": range(1,5), "weights": ["uniform", "distance"]}
+rsearch = RandomizedSearchCV(estimator=knn,
+                             param_distributions=params,
+                             cv=4,
+                             n_iter=8,
+                             random_state=5)
+rsearch.fit(X_train, y_train)
+#print(rsearch.best_score_)
