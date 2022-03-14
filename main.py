@@ -255,12 +255,18 @@ data_final = pd.merge(data_fin, data, how='outer')
 
 
 # compute final column 'CO2 Score' and integrate into final dataframe
+# determine cutoff-values for class A-E according to quantiles
+#print(np.quantile(data_final['final_co2'], 0.2))
+#print(np.quantile(data_final['final_co2'], 0.4))
+#print(np.quantile(data_final['final_co2'], 0.6))
+#print(np.quantile(data_final['final_co2'], 0.8))
+
 conditions = [
-    (data_final['final_co2'] < 0.25),
-    (data_final['final_co2'] >= 0.25) & (data_final['final_co2'] < 0.5),
-    (data_final['final_co2'] >= 0.5) & (data_final['final_co2'] < 1),
-    (data_final['final_co2'] >= 1) & (data_final['final_co2'] < 2),
-    (data_final['final_co2'] >= 2)
+    (data_final['final_co2'] < 0.35),
+    (data_final['final_co2'] >= 0.35) & (data_final['final_co2'] < 0.45),
+    (data_final['final_co2'] >= 0.45) & (data_final['final_co2'] < 0.6),
+    (data_final['final_co2'] >= 0.6) & (data_final['final_co2'] < 0.8),
+    (data_final['final_co2'] >= 0.8)
 ]
 values = ['A', 'B', 'C', 'D', 'E']
 data_final['co2_score'] = np.select(conditions, values)
@@ -272,11 +278,9 @@ data_final = data_final[['produce', 'base_co2', 'origin_country', 'transport_typ
 #data_final.to_excel("calc_data_final.xlsx",
                 #    sheet_name='all countries')
 
-
 # check distribution of the CO2-scores
 #data_final['co2_score'].hist()
 #plt.show()
-
 
 
 ## START DATA MODELING
@@ -309,6 +313,7 @@ labels_organic = mydf_replace['organic_produce'].astype('category').cat.categori
 replace_organic = {'organic_produce' : {k: v for k,v in zip(labels_organic,list(range(1,len(labels_organic)+1)))}}
 labels_co2score = mydf_replace['co2_score'].astype('category').cat.categories.tolist()
 replace_co2score = {'co2_score' : {k: v for k,v in zip(labels_co2score,list(range(1,len(labels_co2score)+1)))}}
+#print(replace_produce)
 
 mydf_replace.replace(replace_produce, inplace=True)
 mydf_replace.replace(replace_country, inplace=True)
@@ -317,27 +322,27 @@ mydf_replace.replace(replace_greenhouse, inplace=True)
 mydf_replace.replace(replace_organic, inplace=True)
 mydf_replace.replace(replace_co2score, inplace=True)
 
-
 # original
 y = mydf_replace.co2_score
-#mydf_features = ['produce', 'origin_country','transport_type','greenhouse_produce','organic_produce']
+mydf_features = ['produce', 'origin_country','transport_type','greenhouse_produce','organic_produce']
 #X = mydf_replace[mydf_features]
 
 # adjusted
-mydf2 = ['produce', 'origin_country','transport_type', 'base_co2',
-                 'greenhouse_produce','organic_produce']
-X = mydf_replace[mydf2]
+#mydf2 = ['produce', 'origin_country','transport_type', 'base_co2',
+               #  'greenhouse_produce','organic_produce']
+X = mydf_replace[mydf_features]
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size= 0.2, random_state=0)
 sc = StandardScaler()
 X_train = sc.fit_transform(X_train)
 X_test = sc.fit_transform(X_test)
 
-
 # Decision Tree Regressor model
 dtr = DecisionTreeRegressor(random_state=0)
-dtr.fit(X_train, y_train)
-prediction_dtr = dtr.predict(X_test)
+#dtr.fit(X_train, y_train)
+#prediction_dtr = dtr.predict(X_test)
+#print('Decision Tree:')
 #print(classification_report(y_test, prediction_dtr))
+#print(confusion_matrix(y_test, prediction_dtr))
 # accuracy of 57%
 # with 'base_co2' --> accuracy: 62%
 # with all transport co2 values --> accuracy: 99%
@@ -346,38 +351,38 @@ prediction_dtr = dtr.predict(X_test)
 rfc = RandomForestClassifier(n_estimators=200)
 rfc.fit(X_train, y_train)
 prediction_rfc = rfc.predict(X_test)
-# print(classification_report(y_test, prediction_rfc))
+#print('Random Forest Classifier:')
+#print(classification_report(y_test, prediction_rfc))
+#print(confusion_matrix(y_test, prediction_rfc))
 # accuracy of 54%
 # with 'base_co2' --> accuracy: 55%
 
 # Support Vector Classifier
 svc = SVC()
-svc.fit(X_train, y_train)
-prediction_svc = svc.predict(X_test)
+#svc.fit(X_train, y_train)
+#prediction_svc = svc.predict(X_test)
+#print('Support Vector Classifier:')
 #print(classification_report(y_test, prediction_svc))
+#print(confusion_matrix(y_test, prediction_svc))
 # accuracy of 53%
 # with 'base_co2' --> accuracy: 64%
 
-# Stochastic Gradient Decent Classifier
+# Stochastic Gradient Descent Classifier
 sgd = SGDClassifier(penalty=None)
-sgd.fit(X_train, y_train)
-prediction_sgd = sgd.predict(X_test)
+#sgd.fit(X_train, y_train)
+#prediction_sgd = sgd.predict(X_test)
+#print('Stochastic Gradient Descent Classifier:')
 #print(classification_report(y_test, prediction_sgd))
+#print(confusion_matrix(y_test, prediction_sgd))
 # accuracy of 52%
 # with 'base_co2' --> accuracy: 58%
-
-# Linear Regression - 'parameters can't handle mix of multiclass and continuous targets'
-from sklearn.linear_model import LinearRegression
-#lr = LinearRegression(normalize=True)
-#lr.fit(X, y)
-#prediction_lr = lr.predict(X_test)
-#print(classification_report(y_test, prediction_lr))
 
 # Naive Bayes
 from sklearn.naive_bayes import GaussianNB
 gnb = GaussianNB()
-gnb.fit(X_train, y_train)
-prediction_gnb = gnb.predict(X_test)
+#gnb.fit(X_train, y_train)
+#prediction_gnb = gnb.predict(X_test)
+#print('Naive Bayes:')
 #print(classification_report(y_test, prediction_gnb))
 # accuracy of 50%
 # with 'base_co2' --> accuracy: 60%
@@ -385,7 +390,7 @@ prediction_gnb = gnb.predict(X_test)
 # KNN - doesn't work!!
 from sklearn import neighbors
 
-knn = neighbors.KNeighborsClassifier(n_neighbors=4)
+knn = neighbors.KNeighborsClassifier(n_neighbors=3)
 knn.fit(X_train, y_train)
 prediction_knn = knn.predict_proba(X_test)
 #print(classification_report(y_test, prediction_knn))
@@ -395,9 +400,9 @@ prediction_knn = knn.predict_proba(X_test)
 ## fine-tuning the model
 # grid search
 from sklearn.model_selection import GridSearchCV
-#params = {"n_neighbors": np.arange(1,5), "metric": ["euclidean", "cityblock"]}
-#grid = GridSearchCV(estimator=knn, param_grid=params)
-#grid.fit(X_train, y_train)
+params = {"n_neighbors": np.arange(1,5), "metric": ["euclidean", "cityblock"]}
+grid = GridSearchCV(estimator=knn, param_grid=params)
+grid.fit(X_train, y_train)
 #print(grid.best_score_)
 #print(grid.best_estimator_.n_neighbors)
 
@@ -411,4 +416,3 @@ rsearch = RandomizedSearchCV(estimator=knn,
                              random_state=5)
 rsearch.fit(X_train, y_train)
 #print(rsearch.best_score_)
-
