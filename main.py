@@ -144,8 +144,8 @@ origin_country_regional.columns = ['origin_country']
 data = pd.concat([produce, base_co2, origin_country_regional, greenhouse_data, organic_data], axis=1)
 data['final_co2'] = (data['base_co2'] + data['greenhouse_value']) * (1 - (data['organic_value'] / 100))
 # print(data)
-#data.to_excel("calc_co2_data_regional.xlsx",
-            #  sheet_name='Germany')
+# data.to_excel("calc_co2_data_regional.xlsx",
+#  sheet_name='Germany')
 
 ## GENERATE DATAFRAME FOR OVERSEAS PRODUCE - AIR FREIGHT VERSION
 #
@@ -191,8 +191,8 @@ data_air = pd.concat([produce_air, base_co2_air, origin_country_air, transport_p
                       organic_data_air], axis=1)
 data_air['final_co2'] = (data_air['base_co2'] + data_air['plane_co2_per_kg']) * (1 - (data_air['organic_value'] / 100))
 # print(data_air)
-#data_air.to_excel("calc_co2_plane_data_final.xlsx",
-                #  sheet_name='plane')
+# data_air.to_excel("calc_co2_plane_data_final.xlsx",
+#  sheet_name='plane')
 
 ## GENERATE DATAFRAME FOR OVERSEAS PRODUCE - SEA FREIGHT VERSION
 #
@@ -236,30 +236,29 @@ transport_ship_value = pd.concat([transport_ship_value] * 37, ignore_index=True)
 data_ship = pd.concat([produce_sea, base_co2_sea, origin_country_sea, transport_ship, transport_ship_value,
                        organic_data_sea], axis=1)
 data_ship['final_co2'] = (data_ship['base_co2'] + data_ship['ship_co2_per_kg']) * (
-            1 - (data_ship['organic_value'] / 100))
+        1 - (data_ship['organic_value'] / 100))
 # print(data_ship)
-data_ship.to_excel("calc_co2_ship_data_final.xlsx",
-                   sheet_name='ship')
+# data_ship.to_excel("calc_co2_ship_data_final.xlsx",
+#       sheet_name='ship')
 
 # merge 3 separate dataframes into 1
 data_fin = pd.merge(data_air, data_ship, how='outer')
 # print(data_final)
 data_final = pd.merge(data_fin, data, how='outer')
 
-
 # histogram shows distribution of the final co2-values
-#print(min(data_final['final_co2']))
-#print(max(data_final['final_co2']))
-#data_final['final_co2'].hist()
-#plt.show()
+# print(min(data_final['final_co2']))
+# print(max(data_final['final_co2']))
+# data_final['final_co2'].hist()
+# plt.show()
 
 
 # compute final column 'CO2 Score' and integrate into final dataframe
 # determine cutoff-values for class A-E according to quantiles
-#print(np.quantile(data_final['final_co2'], 0.2))
-#print(np.quantile(data_final['final_co2'], 0.4))
-#print(np.quantile(data_final['final_co2'], 0.6))
-#print(np.quantile(data_final['final_co2'], 0.8))
+# print(np.quantile(data_final['final_co2'], 0.2))
+# print(np.quantile(data_final['final_co2'], 0.4))
+# print(np.quantile(data_final['final_co2'], 0.6))
+# print(np.quantile(data_final['final_co2'], 0.8))
 
 conditions = [
     (data_final['final_co2'] < 0.35),
@@ -273,14 +272,14 @@ data_final['co2_score'] = np.select(conditions, values)
 
 data_final = data_final[['produce', 'base_co2', 'origin_country', 'transport_type', 'plane_co2_per_kg',
                          'ship_co2_per_kg', 'greenhouse_produce', 'greenhouse_value', 'organic_produce',
-                         'organic_value', 'final_co2','co2_score']]
-#print(data_final)
-#data_final.to_excel("calc_data_final.xlsx",
-                #    sheet_name='all countries')
+                         'organic_value', 'final_co2', 'co2_score']]
+# print(data_final)
+# data_final.to_excel("calc_data_final.xlsx",
+#    sheet_name='all countries')
 
 # check distribution of the CO2-scores
-#data_final['co2_score'].hist()
-#plt.show()
+# data_final['co2_score'].hist()
+# plt.show()
 
 
 ## START DATA MODELING
@@ -288,13 +287,14 @@ from sklearn import neighbors, datasets, preprocessing
 from sklearn.metrics import accuracy_score
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.metrics import mean_absolute_error
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.svm import SVC
 from sklearn.linear_model import SGDClassifier
 from sklearn.metrics import confusion_matrix, classification_report
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.model_selection import train_test_split, GridSearchCV, cross_val_score
-#%matplotlib inline
+
+# %matplotlib inline
 
 # Preprocessing Data for performing Machine learning algorithms
 data_final = data_final.fillna(0)
@@ -302,18 +302,20 @@ mydf = data_final
 
 mydf_replace = mydf.copy()
 labels_produce = mydf_replace['produce'].astype('category').cat.categories.tolist()
-replace_produce = {'produce' : {k: v for k,v in zip(labels_produce,list(range(1,len(labels_produce)+1)))}}
+replace_produce = {'produce': {k: v for k, v in zip(labels_produce, list(range(1, len(labels_produce) + 1)))}}
 labels_country = mydf_replace['origin_country'].astype('category').cat.categories.tolist()
-replace_country = {'origin_country' : {k: v for k,v in zip(labels_country,list(range(1,len(labels_country)+1)))}}
+replace_country = {'origin_country': {k: v for k, v in zip(labels_country, list(range(1, len(labels_country) + 1)))}}
 labels_transport = mydf_replace['transport_type'].astype('category').cat.categories.tolist()
-replace_transport = {'transport_type' : {k: v for k,v in zip(labels_transport,list(range(1,len(labels_transport)+1)))}}
+replace_transport = {
+    'transport_type': {k: v for k, v in zip(labels_transport, list(range(1, len(labels_transport) + 1)))}}
 labels_greenhouse = mydf_replace['greenhouse_produce'].astype('category').cat.categories.tolist()
-replace_greenhouse = {'greenhouse_produce' : {k: v for k,v in zip(labels_greenhouse,list(range(1,len(labels_greenhouse)+1)))}}
+replace_greenhouse = {
+    'greenhouse_produce': {k: v for k, v in zip(labels_greenhouse, list(range(1, len(labels_greenhouse) + 1)))}}
 labels_organic = mydf_replace['organic_produce'].astype('category').cat.categories.tolist()
-replace_organic = {'organic_produce' : {k: v for k,v in zip(labels_organic,list(range(1,len(labels_organic)+1)))}}
+replace_organic = {'organic_produce': {k: v for k, v in zip(labels_organic, list(range(1, len(labels_organic) + 1)))}}
 labels_co2score = mydf_replace['co2_score'].astype('category').cat.categories.tolist()
-replace_co2score = {'co2_score' : {k: v for k,v in zip(labels_co2score,list(range(1,len(labels_co2score)+1)))}}
-#print(replace_produce)
+replace_co2score = {'co2_score': {k: v for k, v in zip(labels_co2score, list(range(1, len(labels_co2score) + 1)))}}
+# print(replace_produce)
 
 mydf_replace.replace(replace_produce, inplace=True)
 mydf_replace.replace(replace_country, inplace=True)
@@ -324,24 +326,24 @@ mydf_replace.replace(replace_co2score, inplace=True)
 
 # original
 y = mydf_replace.co2_score
-mydf_features = ['produce', 'origin_country','transport_type','greenhouse_produce','organic_produce']
-#X = mydf_replace[mydf_features]
+mydf_features = ['produce', 'origin_country', 'transport_type', 'greenhouse_produce', 'organic_produce']
+# X = mydf_replace[mydf_features]
 
 # adjusted
-#mydf2 = ['produce', 'origin_country','transport_type', 'base_co2',
-               #  'greenhouse_produce','organic_produce']
+# mydf2 = ['produce', 'origin_country','transport_type', 'base_co2',
+#  'greenhouse_produce','organic_produce']
 X = mydf_replace[mydf_features]
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size= 0.2, random_state=0)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=0)
 sc = StandardScaler()
 X_train = sc.fit_transform(X_train)
 X_test = sc.fit_transform(X_test)
 
 # Decision Tree Regressor model
 dtr = DecisionTreeRegressor(random_state=0)
-#dtr.fit(X_train, y_train)
-#prediction_dtr = dtr.predict(X_test)
-#print('Decision Tree:')
-#print(classification_report(y_test, prediction_dtr))
+dtr.fit(X_train, y_train)
+prediction_dtr = dtr.predict(X_test)
+print('Decision Tree:')
+print(classification_report(y_test, prediction_dtr))
 #print(confusion_matrix(y_test, prediction_dtr))
 # accuracy of 57%
 # with 'base_co2' --> accuracy: 62%
@@ -351,68 +353,128 @@ dtr = DecisionTreeRegressor(random_state=0)
 rfc = RandomForestClassifier(n_estimators=200)
 rfc.fit(X_train, y_train)
 prediction_rfc = rfc.predict(X_test)
-#print('Random Forest Classifier:')
-#print(classification_report(y_test, prediction_rfc))
+print('Random Forest Classifier:')
+print(classification_report(y_test, prediction_rfc))
 #print(confusion_matrix(y_test, prediction_rfc))
 # accuracy of 54%
 # with 'base_co2' --> accuracy: 55%
 
 # Support Vector Classifier
 svc = SVC()
-#svc.fit(X_train, y_train)
-#prediction_svc = svc.predict(X_test)
-#print('Support Vector Classifier:')
-#print(classification_report(y_test, prediction_svc))
+svc.fit(X_train, y_train)
+prediction_svc = svc.predict(X_test)
+print('Support Vector Classifier:')
+print(classification_report(y_test, prediction_svc))
 #print(confusion_matrix(y_test, prediction_svc))
 # accuracy of 53%
 # with 'base_co2' --> accuracy: 64%
 
 # Stochastic Gradient Descent Classifier
 sgd = SGDClassifier(penalty=None)
-#sgd.fit(X_train, y_train)
-#prediction_sgd = sgd.predict(X_test)
-#print('Stochastic Gradient Descent Classifier:')
-#print(classification_report(y_test, prediction_sgd))
-#print(confusion_matrix(y_test, prediction_sgd))
+sgd.fit(X_train, y_train)
+prediction_sgd = sgd.predict(X_test)
+print('Stochastic Gradient Descent Classifier:')
+print(classification_report(y_test, prediction_sgd))
+# print(confusion_matrix(y_test, prediction_sgd))
 # accuracy of 52%
 # with 'base_co2' --> accuracy: 58%
 
 # Naive Bayes
 from sklearn.naive_bayes import GaussianNB
+
 gnb = GaussianNB()
-#gnb.fit(X_train, y_train)
-#prediction_gnb = gnb.predict(X_test)
-#print('Naive Bayes:')
-#print(classification_report(y_test, prediction_gnb))
+gnb.fit(X_train, y_train)
+prediction_gnb = gnb.predict(X_test)
+print('Naive Bayes:')
+print(classification_report(y_test, prediction_gnb))
 # accuracy of 50%
 # with 'base_co2' --> accuracy: 60%
 
-# KNN - doesn't work!!
-from sklearn import neighbors
 
-knn = neighbors.KNeighborsClassifier(n_neighbors=3)
-knn.fit(X_train, y_train)
-prediction_knn = knn.predict_proba(X_test)
-#print(classification_report(y_test, prediction_knn))
-# accuracy of ...
-
-
-## fine-tuning the model
-# grid search
-from sklearn.model_selection import GridSearchCV
-params = {"n_neighbors": np.arange(1,5), "metric": ["euclidean", "cityblock"]}
-grid = GridSearchCV(estimator=knn, param_grid=params)
-grid.fit(X_train, y_train)
-#print(grid.best_score_)
-#print(grid.best_estimator_.n_neighbors)
+## FINE-TUNING THE MODEL
 
 # randomized parameter optimization
 from sklearn.model_selection import RandomizedSearchCV
-params = {"n_neighbors": range(1,5), "weights": ["uniform", "distance"]}
-rsearch = RandomizedSearchCV(estimator=knn,
-                             param_distributions=params,
-                             cv=4,
-                             n_iter=8,
-                             random_state=5)
-rsearch.fit(X_train, y_train)
-#print(rsearch.best_score_)
+
+# Number of trees in random forest
+n_estimators = [int(x) for x in np.linspace(start=200, stop=2000, num=10)]
+# Number of features to consider at every split
+max_features = ['auto', 'sqrt']
+# Maximum number of levels in tree
+max_depth = [int(x) for x in np.linspace(10, 110, num=11)]
+max_depth.append(None)
+# Minimum number of samples required to split a node
+min_samples_split = [2, 5, 10]
+# Minimum number of samples required at each leaf node
+min_samples_leaf = [1, 2, 4]
+# Method of selecting samples for training each tree
+bootstrap = [True, False]
+# Create the random grid
+random_grid = {'n_estimators': n_estimators,
+               'max_features': max_features,
+               'max_depth': max_depth,
+               'min_samples_split': min_samples_split,
+               'min_samples_leaf': min_samples_leaf,
+               'bootstrap': bootstrap}
+print(random_grid)
+# First create the base model to tune
+rf = RandomForestRegressor()
+# Random search of parameters, using 3 fold cross validation,
+# search across 100 different combinations, and use all available cores
+rf_random = RandomizedSearchCV(estimator=rf, param_distributions=random_grid, n_iter=100, cv=3, verbose=2,
+                               random_state=42, n_jobs=-1)
+# Fit the random search model
+rf_random.fit(X_train, y_train)
+print(rf_random.best_params_)
+
+
+# grid search
+from sklearn.model_selection import GridSearchCV
+# Create the parameter grid based on the results of random search
+param_grid = {
+    'bootstrap': [True],
+    'max_depth': [80, 90, 100, 110],
+    'max_features': [2, 3],
+    'min_samples_leaf': [2, 3, 4],
+    'min_samples_split': [3, 5, 7],
+    'n_estimators': [100, 200, 300, 1600]
+}
+# Create a based model
+rf = RandomForestRegressor()
+# Instantiate the grid search model
+grid_search = GridSearchCV(estimator = rf, param_grid = param_grid,
+                          cv = 3, n_jobs = -1, verbose = 2)
+grid_search.fit(X_train, y_train)
+print(grid_search.best_params_)
+
+
+# compare model performance
+# base model
+rfc = RandomForestClassifier(n_estimators=200)
+rfc.fit(X_train, y_train)
+prediction_rfc = rfc.predict(X_test)
+print(classification_report(y_test, prediction_rfc))
+
+
+# improved model - randomized search
+rfc_opt = RandomForestClassifier(n_estimators=600,
+                                 min_samples_split=5,
+                                 min_samples_leaf=1,
+                                 max_features='auto',
+                                 max_depth=80,
+                                 bootstrap=True)
+rfc_opt.fit(X_train, y_train)
+prediction_rfc_opt = rfc_opt.predict(X_test)
+print(classification_report(y_test, prediction_rfc_opt))
+
+
+# improved model - grid search
+rfc_opt2 = RandomForestClassifier(n_estimators=200,
+                                 min_samples_split=7,
+                                 min_samples_leaf=4,
+                                 max_features=2,
+                                 max_depth=90,
+                                 bootstrap=True)
+rfc_opt2.fit(X_train, y_train)
+prediction_rfc_opt2 = rfc_opt2.predict(X_test)
+print(classification_report(y_test, prediction_rfc_opt2))
