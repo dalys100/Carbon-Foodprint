@@ -10,7 +10,7 @@ import seaborn as sns
 ## DATA CLEANING
 # CALCULATING DATA FOR TRANSPORT BY SHIPS
 # Read file and delete all rows without values for column 'country'
-harbor = pd.read_excel("C:/Users/Daria/Documents/datasets_techlabs/worldwide_port_data.xlsx")
+harbor = pd.read_excel("worldwide_port_data.xlsx")
 harbor = pd.DataFrame(harbor)
 harbor = harbor.replace(r'^\s*$', np.NaN, regex=True)
 harbor = harbor.dropna(subset=['country'])
@@ -60,7 +60,7 @@ harbor['ship_co2_per_kg'] = ((harbor['distance_km'] * 0.015 * weight_ship) / (50
 
 # CALCULATING DATA FOR TRANSPORT BY PLANE
 # Read file and delete all rows without values for column 'country'
-airport = pd.read_excel("C:/Users/Daria/Documents/datasets_techlabs/airport_data.xlsx")
+airport = pd.read_excel("airport_data.xlsx")
 airport = pd.DataFrame(airport)
 airport = airport.replace(r'^\s*$', np.NaN, regex=True)
 airport = airport.dropna(subset=['Airport Country'])
@@ -112,7 +112,7 @@ print(airport['plane_co2_per_kg'])
 
 ## GENERATE DATAFRAME FOR REGIONAL PRODUCE - GERMANY VERSION
 # import base value data
-base_data = pd.read_excel("C:/Users/Daria/Documents/datasets_techlabs/fruit_veggies_agriculture_base_CO2.xlsx")
+base_data = pd.read_excel("fruit_veggies_agriculture_base_CO2.xlsx")
 base_data = pd.DataFrame(base_data)
 
 # generate 'produce' and 'base co2' columns
