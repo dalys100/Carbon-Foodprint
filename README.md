@@ -45,7 +45,15 @@ In the end we managed to fully clean our data and calculate all the carbon emiss
 
 * **Rewe Web Scraping Produce Countries (incomplete).ipynb**
 
-:arrow_right: First tries of web scraping back when we still wanted to have common origin countries for specific produce items
+:arrow_right: First tries of web scraping back when we still wanted to have common origin countries for specific produce items (not needed to run the python file)
+
+## Required packages 📦
+* numpy
+* pandas
+* geopy.distance
+* matplotlib.pyplot
+* seaborn
+* sklearn
 
 
 ## Authors :woman_technologist: :technologist:
