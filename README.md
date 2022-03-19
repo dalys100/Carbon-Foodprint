@@ -16,6 +16,7 @@ We wanted to be able to calculate a Co2 Score for a piece of fruit depending on:
 * the transport type
 * the month it is bought in
 * whether it is organic or not
+* whether it was grown in a greenhouse or not
 
 For example, we used GPS coordinates of airports and harbours around the world to calculate the distance between the origin country of the produce and Germany and then used an estimate of the average CO2 amount emitted by plane/ship transportation.
 
