@@ -418,7 +418,9 @@ prediction_gnb = gnb.predict(X_test)
 print('Report for Naive Bayes:')
 print(classification_report(y_test, prediction_gnb))
 print('####')
-print('Random Forest Classifier is chosen as the best model.')
+print('Random Forest Classifier is chosen as the best model. It has the highest accuracy right after the Decision Tree model.)
+print('The Random Forest prevents overfitting by using multiple trees which creates a more accurate result for our use case.')
+print('We use accuracy as the main performance evaluator as falsely predicted values to do not cause significant harm for the intended user.')
 
 
 
@@ -520,3 +522,4 @@ feat_importances = pd.Series(rfc_opt2.feature_importances_, index=X.columns)
 feat_importances.nlargest(5).plot(kind='barh')
 plt.show()
 print('The most important features are: produce, plane_co2_per_kg and ship_co2_per_kg.')
+print('This makes sense as the CO2 emissions from transportation have the highest variance in values among our variables.')
