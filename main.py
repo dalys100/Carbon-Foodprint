@@ -418,7 +418,7 @@ prediction_gnb = gnb.predict(X_test)
 print('Report for Naive Bayes:')
 print(classification_report(y_test, prediction_gnb))
 print('####')
-print('Random Forest Classifier is chosen as the best model. It has the highest accuracy right after the Decision Tree model.)
+print('Random Forest Classifier is chosen as the best model. It has the highest accuracy right after the Decision Tree model.')
 print('The Random Forest prevents overfitting by using multiple trees which creates a more accurate result for our use case.')
 print('We use accuracy as the main performance evaluator as falsely predicted values to do not cause significant harm for the intended user.')
 
